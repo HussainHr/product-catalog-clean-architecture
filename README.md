@@ -29,6 +29,7 @@ lib/
 |--------|--------|
 | 0 | Baseline shell |
 | 1 | Riverpod + theme + folder structure |
+| 2 | Domain layer (entities, repositories, use cases) |
 
 ## Commands
 
