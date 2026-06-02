@@ -31,6 +31,7 @@ lib/
 | 1 | Riverpod + theme + folder structure |
 | 2 | Domain layer (entities, repositories, use cases) |
 | 3 | Data layer (API model, remote DS, repository impl) |
+| 4 | Riverpod DI (providers wired) |
 
 ## Commands
 
