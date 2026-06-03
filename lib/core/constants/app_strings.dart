@@ -1,5 +1,7 @@
+import 'package:product_catalog_application/core/constants/app_constants.dart';
+
 abstract final class AppStrings {
-  static const String appTitle = 'Product Catalog';
+  static const String appTitle = AppConstants.appName;
   static const String productsTitle = 'Products';
   static const String loadingProducts = 'Loading products...';
   static const String loadingMoreProducts = 'Loading more products...';
