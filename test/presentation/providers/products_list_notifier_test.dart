@@ -51,6 +51,41 @@ void main() {
     expect(products, [_sampleProduct]);
   });
 
+  test('retry sets loading then reloads', () async {
+    var callCount = 0;
+    final container = ProviderContainer(
+      overrides: [
+        getProductsProvider.overrideWithValue(
+          GetProducts(
+            _FakeProductRepository(
+              Success([
+                Product(
+                  id: ++callCount,
+                  title: 'Item $callCount',
+                  price: 10,
+                  description: 'Desc',
+                  category: 'test',
+                  imageUrl: 'https://example.com/image.png',
+                  rating: 4,
+                  ratingCount: 1,
+                ),
+              ]),
+            ),
+          ),
+        ),
+      ],
+    );
+    addTearDown(container.dispose);
+
+    await container.read(productsListProvider.future);
+    final notifier = container.read(productsListProvider.notifier);
+
+    await notifier.retry();
+
+    expect(container.read(productsListProvider).isLoading, isFalse);
+    expect(container.read(productsListProvider).hasValue, isTrue);
+  });
+
   test('throws failure when repository fails', () async {
     final container = ProviderContainer(
       overrides: [

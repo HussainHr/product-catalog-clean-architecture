@@ -4,10 +4,10 @@ import 'package:product_catalog_application/core/constants/app_strings.dart';
 import 'package:product_catalog_application/core/error/failures.dart';
 import 'package:product_catalog_application/domain/entities/product.dart';
 import 'package:product_catalog_application/presentation/providers/products_list_provider.dart';
+import 'package:product_catalog_application/presentation/routing/app_router.dart';
 import 'package:product_catalog_application/presentation/widgets/empty_view.dart';
 import 'package:product_catalog_application/presentation/widgets/error_view.dart';
 import 'package:product_catalog_application/presentation/widgets/loading_view.dart';
-import 'package:product_catalog_application/presentation/routing/app_router.dart';
 import 'package:product_catalog_application/presentation/widgets/product_card.dart';
 
 class ProductsListScreen extends ConsumerWidget {
@@ -25,7 +25,7 @@ class ProductsListScreen extends ConsumerWidget {
         loading: () => const LoadingView(message: AppStrings.loadingProducts),
         error: (error, _) => ErrorView(
           message: _errorMessage(error),
-          onRetry: () => ref.read(productsListProvider.notifier).refresh(),
+          onRetry: () => ref.read(productsListProvider.notifier).retry(),
         ),
         data: (products) => _ProductsBody(products: products),
       ),
@@ -40,15 +40,29 @@ class ProductsListScreen extends ConsumerWidget {
   }
 }
 
-class _ProductsBody extends StatelessWidget {
+class _ProductsBody extends ConsumerWidget {
   const _ProductsBody({required this.products});
 
   final List<Product> products;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    Future<void> onRefresh() =>
+        ref.read(productsListProvider.notifier).refresh();
+
     if (products.isEmpty) {
-      return const EmptyView();
+      return RefreshIndicator(
+        onRefresh: onRefresh,
+        child: ListView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          children: const [
+            SizedBox(
+              height: 320,
+              child: EmptyView(),
+            ),
+          ],
+        ),
+      );
     }
 
     return LayoutBuilder(
@@ -56,15 +70,36 @@ class _ProductsBody extends StatelessWidget {
         final useGrid = constraints.maxWidth >= 600;
 
         if (useGrid) {
-          return GridView.builder(
-            padding: const EdgeInsets.all(16),
-            gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-              maxCrossAxisExtent: 400,
-              mainAxisSpacing: 12,
-              crossAxisSpacing: 12,
-              childAspectRatio: 2.4,
+          return RefreshIndicator(
+            onRefresh: onRefresh,
+            child: GridView.builder(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.all(16),
+              gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                maxCrossAxisExtent: 400,
+                mainAxisSpacing: 12,
+                crossAxisSpacing: 12,
+                childAspectRatio: 2.4,
+              ),
+              itemCount: products.length,
+              itemBuilder: (context, index) {
+                final product = products[index];
+                return ProductCard(
+                  product: product,
+                  onTap: () => openProductDetail(context, product),
+                );
+              },
             ),
+          );
+        }
+
+        return RefreshIndicator(
+          onRefresh: onRefresh,
+          child: ListView.separated(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: const EdgeInsets.all(16),
             itemCount: products.length,
+            separatorBuilder: (context, index) => const SizedBox(height: 12),
             itemBuilder: (context, index) {
               final product = products[index];
               return ProductCard(
@@ -72,20 +107,7 @@ class _ProductsBody extends StatelessWidget {
                 onTap: () => openProductDetail(context, product),
               );
             },
-          );
-        }
-
-        return ListView.separated(
-          padding: const EdgeInsets.all(16),
-          itemCount: products.length,
-          separatorBuilder: (context, index) => const SizedBox(height: 12),
-          itemBuilder: (context, index) {
-            final product = products[index];
-            return ProductCard(
-              product: product,
-              onTap: () => openProductDetail(context, product),
-            );
-          },
+          ),
         );
       },
     );

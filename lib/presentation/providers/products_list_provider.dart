@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:product_catalog_application/core/error/result.dart';import 'package:product_catalog_application/domain/entities/product.dart';
+import 'package:product_catalog_application/core/error/result.dart';
+import 'package:product_catalog_application/domain/entities/product.dart';
 import 'package:product_catalog_application/presentation/providers/product_providers.dart';
 
 class ProductsListNotifier extends AsyncNotifier<List<Product>> {
@@ -8,7 +9,13 @@ class ProductsListNotifier extends AsyncNotifier<List<Product>> {
     return _loadProducts();
   }
 
+  /// Pull-to-refresh: keeps current list visible while reloading.
   Future<void> refresh() async {
+    state = await AsyncValue.guard(_loadProducts);
+  }
+
+  /// Full-screen reload (e.g. retry from error state).
+  Future<void> retry() async {
     state = const AsyncLoading();
     state = await AsyncValue.guard(_loadProducts);
   }

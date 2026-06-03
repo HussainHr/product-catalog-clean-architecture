@@ -27,6 +27,19 @@ class _SuccessProductsListNotifier extends ProductsListNotifier {
   Future<List<Product>> build() async => const [_sampleProduct];
 }
 
+class _RefreshTrackingNotifier extends ProductsListNotifier {
+  var refreshCallCount = 0;
+
+  @override
+  Future<List<Product>> build() async => const [_sampleProduct];
+
+  @override
+  Future<void> refresh() async {
+    refreshCallCount++;
+    await super.refresh();
+  }
+}
+
 class _EmptyProductsListNotifier extends ProductsListNotifier {
   @override
   Future<List<Product>> build() async => [];
@@ -112,6 +125,39 @@ void main() {
     await _pumpUntilSettled(tester);
 
     expect(find.text(AppStrings.noProductsFound), findsOneWidget);
+  });
+
+  testWidgets('wraps list with RefreshIndicator for pull to refresh', (tester) async {
+    late _RefreshTrackingNotifier notifier;
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          productsListProvider.overrideWith(() {
+            notifier = _RefreshTrackingNotifier();
+            return notifier;
+          }),
+        ],
+        child: const MaterialApp(
+          home: ProductsListScreen(),
+        ),
+      ),
+    );
+    await _pumpUntilSettled(tester);
+
+    expect(find.byType(RefreshIndicator), findsOneWidget);
+
+    await tester.drag(
+      find.descendant(
+        of: find.byType(RefreshIndicator),
+        matching: find.byType(Scrollable),
+      ),
+      const Offset(0, 300),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(notifier.refreshCallCount, 1);
   });
 
   testWidgets('shows error view with retry button', (tester) async {
