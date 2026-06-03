@@ -8,6 +8,7 @@ import 'package:product_catalog_application/domain/entities/product.dart';
 import 'package:product_catalog_application/presentation/widgets/favorite_button.dart';
 import 'package:product_catalog_application/presentation/widgets/product_image.dart';
 import 'package:product_catalog_application/presentation/widgets/product_rating.dart';
+import 'package:product_catalog_application/presentation/widgets/theme_mode_toggle_button.dart';
 
 class ProductDetailScreen extends ConsumerWidget {
   const ProductDetailScreen({
@@ -23,6 +24,7 @@ class ProductDetailScreen extends ConsumerWidget {
       appBar: AppBar(
         title: const Text(AppStrings.productDetailsTitle),
         actions: [
+          const ThemeModeToggleButton(),
           FavoriteButton(productId: product.id),
         ],
       ),

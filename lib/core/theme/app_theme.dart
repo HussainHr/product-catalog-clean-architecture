@@ -5,12 +5,20 @@ abstract final class AppTheme {
   static const Color seedColor = Color(0xFF1565C0);
   static const Color favoriteColor = Color(0xFFE53935);
 
-  static ThemeData get light {
-    final colorScheme = ColorScheme.fromSeed(seedColor: seedColor);
+  static ThemeData get light => _themeData(Brightness.light);
+
+  static ThemeData get dark => _themeData(Brightness.dark);
+
+  static ThemeData _themeData(Brightness brightness) {
+    final colorScheme = ColorScheme.fromSeed(
+      seedColor: seedColor,
+      brightness: brightness,
+    );
 
     return ThemeData(
       colorScheme: colorScheme,
       useMaterial3: true,
+      brightness: brightness,
       scaffoldBackgroundColor: colorScheme.surface,
       appBarTheme: AppBarTheme(
         centerTitle: false,

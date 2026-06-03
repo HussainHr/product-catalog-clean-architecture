@@ -12,6 +12,7 @@ import 'package:product_catalog_application/presentation/widgets/error_view.dart
 import 'package:product_catalog_application/presentation/widgets/loading_view.dart';
 import 'package:product_catalog_application/presentation/widgets/product_search_bar.dart';
 import 'package:product_catalog_application/presentation/widgets/products_list_content.dart';
+import 'package:product_catalog_application/presentation/widgets/theme_mode_toggle_button.dart';
 
 class ProductsListScreen extends ConsumerWidget {
   const ProductsListScreen({super.key});
@@ -25,6 +26,7 @@ class ProductsListScreen extends ConsumerWidget {
       appBar: AppBar(
         title: const Text(AppStrings.productsTitle),
         actions: [
+          const ThemeModeToggleButton(),
           IconButton(
             key: const Key('favorites_filter_button'),
             icon: Icon(

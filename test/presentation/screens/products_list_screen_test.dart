@@ -66,7 +66,7 @@ Future<Widget> _buildScreen({
       getProductsPageProvider.overrideWithValue(GetProductsPage(repo)),
       ...overrides,
     ],
-    child: const MaterialApp(
+    child: const TestMaterialApp(
       home: ProductsListScreen(),
     ),
   );
@@ -216,6 +216,33 @@ void main() {
 
     expect(find.text('Test Backpack'), findsOneWidget);
     expect(find.text('Mens Casual T-Shirt'), findsNothing);
+  });
+
+  testWidgets('toggles between light and dark theme', (tester) async {
+    await tester.pumpWidget(await _buildScreen());
+    await _pumpUntilSettled(tester);
+
+    expect(find.byIcon(Icons.dark_mode_outlined), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('theme_mode_toggle')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(find.byIcon(Icons.light_mode_outlined), findsOneWidget);
+    expect(
+      tester.widget<MaterialApp>(find.byType(MaterialApp)).themeMode,
+      ThemeMode.dark,
+    );
+
+    await tester.tap(find.byKey(const Key('theme_mode_toggle')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(find.byIcon(Icons.dark_mode_outlined), findsOneWidget);
+    expect(
+      tester.widget<MaterialApp>(find.byType(MaterialApp)).themeMode,
+      ThemeMode.light,
+    );
   });
 
   testWidgets('shows error view with retry button', (tester) async {

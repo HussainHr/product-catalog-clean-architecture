@@ -39,6 +39,7 @@ lib/
 | 9      | Favorites persistence + UI |
 | 10     | UI polish + responsive layout |
 | 11     | Infinite pagination (FakeStore limit/offset) |
+| 12     | Dark / light theme with persistence |
 
 ## Commands
 

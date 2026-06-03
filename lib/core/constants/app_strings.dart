@@ -19,4 +19,6 @@ abstract final class AppStrings {
   static const String showFavoritesOnly = 'Show favorites only';
   static const String showAllProducts = 'Show all products';
   static const String noFavoritesFound = 'No favorite products yet';
+  static const String switchToDarkMode = 'Switch to dark mode';
+  static const String switchToLightMode = 'Switch to light mode';
 }
