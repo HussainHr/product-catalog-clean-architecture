@@ -4,6 +4,7 @@ import 'package:product_catalog_application/data/repositories/product_repository
 import 'package:product_catalog_application/domain/repositories/product_repository.dart';
 import 'package:product_catalog_application/domain/usecases/get_product_by_id.dart';
 import 'package:product_catalog_application/domain/usecases/get_products.dart';
+import 'package:product_catalog_application/domain/usecases/get_products_page.dart';
 import 'package:product_catalog_application/domain/usecases/search_products_by_title.dart';
 import 'package:product_catalog_application/presentation/providers/http_client_provider.dart';
 
@@ -21,6 +22,10 @@ final productRepositoryProvider = Provider<ProductRepository>((ref) {
 
 final getProductsProvider = Provider<GetProducts>((ref) {
   return GetProducts(ref.watch(productRepositoryProvider));
+});
+
+final getProductsPageProvider = Provider<GetProductsPage>((ref) {
+  return GetProductsPage(ref.watch(productRepositoryProvider));
 });
 
 final getProductByIdProvider = Provider<GetProductById>((ref) {

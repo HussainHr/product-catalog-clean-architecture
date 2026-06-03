@@ -1,38 +1,95 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:product_catalog_application/core/constants/api_constants.dart';
 import 'package:product_catalog_application/core/error/result.dart';
-import 'package:product_catalog_application/domain/entities/product.dart';
 import 'package:product_catalog_application/presentation/providers/product_providers.dart';
+import 'package:product_catalog_application/presentation/providers/products_list_state.dart';
 
-class ProductsListNotifier extends AsyncNotifier<List<Product>> {
+class ProductsListNotifier extends Notifier<ProductsListState> {
+  int _offset = 0;
+
   @override
-  Future<List<Product>> build() async {
-    return _loadProducts();
+  ProductsListState build() {
+    Future.microtask(loadFirstPage);
+    return const ProductsListState(isInitialLoading: true);
   }
 
-  /// Pull-to-refresh: keeps current list visible while reloading.
+  Future<void> loadFirstPage() async {
+    _offset = 0;
+    state = const ProductsListState(
+      isInitialLoading: true,
+      products: [],
+      hasMore: true,
+    );
+
+    await _fetchPage(append: false);
+  }
+
+  Future<void> loadNextPage() async {
+    final current = state;
+    if (current.isInitialLoading ||
+        current.isLoadingMore ||
+        !current.hasMore ||
+        current.hasError) {
+      return;
+    }
+
+    state = current.copyWith(isLoadingMore: true);
+    await _fetchPage(append: true);
+  }
+
   Future<void> refresh() async {
-    state = await AsyncValue.guard(_loadProducts);
+    _offset = 0;
+    final currentProducts = state.products;
+
+    state = ProductsListState(
+      products: currentProducts,
+      hasMore: true,
+    );
+
+    await _fetchPage(append: false);
   }
 
-  /// Full-screen reload (e.g. retry from error state).
   Future<void> retry() async {
-    state = const AsyncLoading();
-    state = await AsyncValue.guard(_loadProducts);
+    if (state.products.isEmpty) {
+      await loadFirstPage();
+      return;
+    }
+    await loadNextPage();
   }
 
-  Future<List<Product>> _loadProducts() async {
-    final result = await ref.read(getProductsProvider)();
+  Future<void> _fetchPage({required bool append}) async {
+    final result = await ref.read(getProductsPageProvider)(
+      limit: ApiConstants.defaultPageSize,
+      offset: _offset,
+    );
 
     switch (result) {
       case Success(:final value):
-        return value;
+        final updatedProducts = append
+            ? [...state.products, ...value.products]
+            : value.products;
+        _offset = updatedProducts.length;
+
+        state = ProductsListState(
+          products: updatedProducts,
+          hasMore: value.hasMore,
+          isInitialLoading: false,
+          isLoadingMore: false,
+        );
       case ErrorResult(:final failure):
-        throw failure;
+        if (append && state.products.isNotEmpty) {
+          state = state.copyWith(
+            isLoadingMore: false,
+            failure: failure,
+          );
+        } else {
+          state = ProductsListState(failure: failure);
+        }
     }
   }
 }
 
 final productsListProvider =
-    AsyncNotifierProvider<ProductsListNotifier, List<Product>>(
+    NotifierProvider<ProductsListNotifier, ProductsListState>(
   ProductsListNotifier.new,
 );

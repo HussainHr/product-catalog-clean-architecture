@@ -41,6 +41,20 @@ void main() {
       expect(dataSource.getProducts(), throwsA(isA<ServerException>()));
     });
 
+    test('getProductsPage returns parsed page', () async {
+      final client = MockClient((request) async {
+        expect(request.url.queryParameters['limit'], '2');
+        expect(request.url.queryParameters['offset'], '0');
+        return http.Response(jsonEncode([productJson]), 200);
+      });
+
+      final dataSource = ProductRemoteDataSourceImpl(client: client);
+      final products = await dataSource.getProductsPage(limit: 2, offset: 0);
+
+      expect(products, hasLength(1));
+      expect(products.first.title, 'Backpack');
+    });
+
     test('getProductById throws NotFoundException on 404', () async {
       final client = MockClient((request) async {
         return http.Response('not found', 404);

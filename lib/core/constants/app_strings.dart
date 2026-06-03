@@ -2,6 +2,7 @@ abstract final class AppStrings {
   static const String appTitle = 'Product Catalog';
   static const String productsTitle = 'Products';
   static const String loadingProducts = 'Loading products...';
+  static const String loadingMoreProducts = 'Loading more products...';
   static const String noProductsFound = 'No products found';
   static const String noSearchResults = 'No products match your search';
   static const String searchHint = 'Search by product title';

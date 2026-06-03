@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:product_catalog_application/core/constants/app_strings.dart';
-import 'package:product_catalog_application/core/error/failures.dart';
 import 'package:product_catalog_application/core/theme/app_theme.dart';
 import 'package:product_catalog_application/core/utils/responsive_layout.dart';
-import 'package:product_catalog_application/domain/entities/product.dart';
 import 'package:product_catalog_application/presentation/providers/favorites_providers.dart';
 import 'package:product_catalog_application/presentation/providers/product_providers.dart';
 import 'package:product_catalog_application/presentation/providers/product_search_provider.dart';
 import 'package:product_catalog_application/presentation/providers/products_list_provider.dart';
+import 'package:product_catalog_application/presentation/providers/products_list_state.dart';
 import 'package:product_catalog_application/presentation/widgets/error_view.dart';
 import 'package:product_catalog_application/presentation/widgets/loading_view.dart';
 import 'package:product_catalog_application/presentation/widgets/product_search_bar.dart';
@@ -19,7 +18,7 @@ class ProductsListScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final productsState = ref.watch(productsListProvider);
+    final listState = ref.watch(productsListProvider);
     final showFavoritesOnly = ref.watch(showFavoritesOnlyProvider);
 
     return Scaffold(
@@ -43,37 +42,71 @@ class ProductsListScreen extends ConsumerWidget {
         ],
       ),
       body: ResponsiveContent(
-        child: productsState.when(
-          loading: () => const LoadingView(message: AppStrings.loadingProducts),
-          error: (error, _) => ErrorView(
-            message: _errorMessage(error),
-            onRetry: () => ref.read(productsListProvider.notifier).retry(),
-          ),
-          data: (products) => Column(
-            children: [
-              const ProductSearchBar(),
-              Expanded(
-                child: _ProductsBody(allProducts: products),
-              ),
-            ],
-          ),
-        ),
+        child: _buildBody(context, ref, listState),
       ),
     );
   }
 
-  String _errorMessage(Object error) {
-    if (error is Failure) {
-      return error.message;
+  Widget _buildBody(
+    BuildContext context,
+    WidgetRef ref,
+    ProductsListState listState,
+  ) {
+    if (listState.isInitialLoading) {
+      return const LoadingView(message: AppStrings.loadingProducts);
     }
-    return AppStrings.genericError;
+
+    if (listState.hasError && listState.products.isEmpty) {
+      return ErrorView(
+        message: listState.failure!.message,
+        onRetry: () => ref.read(productsListProvider.notifier).retry(),
+      );
+    }
+
+    return Column(
+      children: [
+        const ProductSearchBar(),
+        if (listState.hasError && listState.products.isNotEmpty)
+          _InlineErrorBanner(
+            message: listState.failure!.message,
+            onRetry: () => ref.read(productsListProvider.notifier).retry(),
+          ),
+        Expanded(
+          child: _ProductsBody(listState: listState),
+        ),
+      ],
+    );
+  }
+}
+
+class _InlineErrorBanner extends StatelessWidget {
+  const _InlineErrorBanner({
+    required this.message,
+    required this.onRetry,
+  });
+
+  final String message;
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialBanner(
+      content: Text(message),
+      leading: const Icon(Icons.error_outline),
+      actions: [
+        TextButton(
+          onPressed: onRetry,
+          child: const Text(AppStrings.retry),
+        ),
+      ],
+    );
   }
 }
 
 class _ProductsBody extends ConsumerWidget {
-  const _ProductsBody({required this.allProducts});
+  const _ProductsBody({required this.listState});
 
-  final List<Product> allProducts;
+  final ProductsListState listState;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -83,7 +116,7 @@ class _ProductsBody extends ConsumerWidget {
     final favoriteIds = ref.watch(favoritesProvider).valueOrNull ?? {};
 
     final searchedProducts = filterProductsBySearch(
-      products: allProducts,
+      products: listState.products,
       query: query,
       searchUseCase: searchUseCase,
     );
@@ -92,14 +125,22 @@ class _ProductsBody extends ConsumerWidget {
         : searchedProducts;
 
     final isSearching = query.trim().isNotEmpty;
+    final canPaginate = !isSearching && !showFavoritesOnly;
 
     Future<void> onRefresh() =>
         ref.read(productsListProvider.notifier).refresh();
 
-    if (allProducts.isEmpty) {
+    void onLoadMore() {
+      if (canPaginate) {
+        ref.read(productsListProvider.notifier).loadNextPage();
+      }
+    }
+
+    if (listState.showEmptyState) {
       return ProductsListContent(
         products: const [],
         onRefresh: onRefresh,
+        onLoadMore: onLoadMore,
       );
     }
 
@@ -107,6 +148,7 @@ class _ProductsBody extends ConsumerWidget {
       return ProductsListContent(
         products: const [],
         onRefresh: onRefresh,
+        onLoadMore: onLoadMore,
         emptyMessage: AppStrings.noFavoritesFound,
         emptyIcon: Icons.favorite_border,
       );
@@ -116,6 +158,7 @@ class _ProductsBody extends ConsumerWidget {
       return ProductsListContent(
         products: const [],
         onRefresh: onRefresh,
+        onLoadMore: onLoadMore,
         emptyMessage: AppStrings.noSearchResults,
         emptyIcon: Icons.search_off,
       );
@@ -124,6 +167,9 @@ class _ProductsBody extends ConsumerWidget {
     return ProductsListContent(
       products: products,
       onRefresh: onRefresh,
+      onLoadMore: onLoadMore,
+      isLoadingMore: canPaginate && listState.isLoadingMore,
+      hasMore: canPaginate && listState.hasMore,
     );
   }
 }

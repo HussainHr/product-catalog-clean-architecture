@@ -1,16 +1,18 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:product_catalog_application/core/constants/app_strings.dart';
 import 'package:product_catalog_application/core/error/failures.dart';
 import 'package:product_catalog_application/domain/entities/product.dart';
+import 'package:product_catalog_application/domain/usecases/get_products_page.dart';
+import 'package:product_catalog_application/presentation/providers/product_providers.dart';
 import 'package:product_catalog_application/presentation/providers/products_list_provider.dart';
+import 'package:product_catalog_application/presentation/providers/products_list_state.dart';
 import 'package:product_catalog_application/presentation/screens/products/product_detail_screen.dart';
 import 'package:product_catalog_application/presentation/screens/products/products_list_screen.dart';
 import 'package:product_catalog_application/presentation/widgets/favorite_button.dart';
 import 'package:product_catalog_application/presentation/widgets/product_card.dart';
+import '../../helpers/paged_product_repository.dart';
 import '../../helpers/test_helpers.dart';
 
 const _sampleProduct = Product(
@@ -35,51 +37,35 @@ const _shirtProduct = Product(
   ratingCount: 5,
 );
 
-class _SuccessProductsListNotifier extends ProductsListNotifier {
+class _LoadingNotifier extends ProductsListNotifier {
   @override
-  Future<List<Product>> build() async => const [_sampleProduct];
+  ProductsListState build() => const ProductsListState(isInitialLoading: true);
 }
 
-class _MultiProductsListNotifier extends ProductsListNotifier {
+class _ErrorNotifier extends ProductsListNotifier {
   @override
-  Future<List<Product>> build() async => const [_sampleProduct, _shirtProduct];
+  ProductsListState build() => const ProductsListState(
+        failure: ServerFailure('Network unavailable'),
+      );
 }
 
-class _RefreshTrackingNotifier extends ProductsListNotifier {
-  var refreshCallCount = 0;
-
+class _EmptyNotifier extends ProductsListNotifier {
   @override
-  Future<List<Product>> build() async => const [_sampleProduct];
-
-  @override
-  Future<void> refresh() async {
-    refreshCallCount++;
-    await super.refresh();
-  }
+  ProductsListState build() => const ProductsListState(products: []);
 }
 
-class _EmptyProductsListNotifier extends ProductsListNotifier {
-  @override
-  Future<List<Product>> build() async => [];
-}
+Future<Widget> _buildScreen({
+  List<Override> overrides = const [],
+  List<Product> products = const [_sampleProduct],
+  PagedProductRepository? repository,
+}) {
+  final repo = repository ?? PagedProductRepository(products);
 
-class _ErrorProductsListNotifier extends ProductsListNotifier {
-  @override
-  Future<List<Product>> build() async {
-    throw const ServerFailure('Network unavailable');
-  }
-}
-
-class _LoadingProductsListNotifier extends ProductsListNotifier {
-  static final _completer = Completer<List<Product>>();
-
-  @override
-  Future<List<Product>> build() => _completer.future;
-}
-
-Future<Widget> _buildScreen(List<Override> overrides) {
   return buildTestApp(
-    overrides: overrides,
+    overrides: [
+      getProductsPageProvider.overrideWithValue(GetProductsPage(repo)),
+      ...overrides,
+    ],
     child: const MaterialApp(
       home: ProductsListScreen(),
     ),
@@ -88,15 +74,17 @@ Future<Widget> _buildScreen(List<Override> overrides) {
 
 Future<void> _pumpUntilSettled(WidgetTester tester) async {
   await tester.pump();
-  await tester.pump(const Duration(milliseconds: 100));
+  await tester.pump(const Duration(milliseconds: 300));
 }
 
 void main() {
   testWidgets('shows loading indicator while fetching', (tester) async {
     await tester.pumpWidget(
-      await _buildScreen([
-        productsListProvider.overrideWith(_LoadingProductsListNotifier.new),
-      ]),
+      await _buildScreen(
+        overrides: [
+          productsListProvider.overrideWith(_LoadingNotifier.new),
+        ],
+      ),
     );
     await tester.pump();
 
@@ -105,11 +93,7 @@ void main() {
   });
 
   testWidgets('shows product list on success', (tester) async {
-    await tester.pumpWidget(
-      await _buildScreen([
-        productsListProvider.overrideWith(_SuccessProductsListNotifier.new),
-      ]),
-    );
+    await tester.pumpWidget(await _buildScreen());
     await _pumpUntilSettled(tester);
 
     expect(find.byType(ProductCard), findsOneWidget);
@@ -119,11 +103,7 @@ void main() {
   });
 
   testWidgets('navigates to product detail on tap', (tester) async {
-    await tester.pumpWidget(
-      await _buildScreen([
-        productsListProvider.overrideWith(_SuccessProductsListNotifier.new),
-      ]),
-    );
+    await tester.pumpWidget(await _buildScreen());
     await _pumpUntilSettled(tester);
 
     await tester.tap(find.byType(ProductCard));
@@ -136,9 +116,10 @@ void main() {
 
   testWidgets('shows empty state when no products', (tester) async {
     await tester.pumpWidget(
-      await _buildScreen([
-        productsListProvider.overrideWith(_EmptyProductsListNotifier.new),
-      ]),
+      await _buildScreen(
+        overrides: [productsListProvider.overrideWith(_EmptyNotifier.new)],
+        products: const [],
+      ),
     );
     await _pumpUntilSettled(tester);
 
@@ -147,16 +128,17 @@ void main() {
 
   testWidgets('filters products locally while typing', (tester) async {
     await tester.pumpWidget(
-      await _buildScreen([
-        productsListProvider.overrideWith(_MultiProductsListNotifier.new),
-      ]),
+      await _buildScreen(products: const [_sampleProduct, _shirtProduct]),
     );
     await _pumpUntilSettled(tester);
 
     expect(find.text('Test Backpack'), findsOneWidget);
     expect(find.text('Mens Casual T-Shirt'), findsOneWidget);
 
-    await tester.enterText(find.byKey(const Key('product_search_field')), 'backpack');
+    await tester.enterText(
+      find.byKey(const Key('product_search_field')),
+      'backpack',
+    );
     await tester.pump();
 
     expect(find.text('Test Backpack'), findsOneWidget);
@@ -165,13 +147,14 @@ void main() {
 
   testWidgets('shows empty state when search has no matches', (tester) async {
     await tester.pumpWidget(
-      await _buildScreen([
-        productsListProvider.overrideWith(_MultiProductsListNotifier.new),
-      ]),
+      await _buildScreen(products: const [_sampleProduct, _shirtProduct]),
     );
     await _pumpUntilSettled(tester);
 
-    await tester.enterText(find.byKey(const Key('product_search_field')), 'watch');
+    await tester.enterText(
+      find.byKey(const Key('product_search_field')),
+      'watch',
+    );
     await tester.pump();
 
     expect(find.text(AppStrings.noSearchResults), findsOneWidget);
@@ -179,19 +162,12 @@ void main() {
   });
 
   testWidgets('wraps list with RefreshIndicator for pull to refresh', (tester) async {
-    late _RefreshTrackingNotifier notifier;
+    final repository = PagedProductRepository([_sampleProduct]);
 
     await tester.pumpWidget(
-      await buildTestApp(
-        overrides: [
-          productsListProvider.overrideWith(() {
-            notifier = _RefreshTrackingNotifier();
-            return notifier;
-          }),
-        ],
-        child: const MaterialApp(
-          home: ProductsListScreen(),
-        ),
+      await _buildScreen(
+        products: const [_sampleProduct],
+        repository: repository,
       ),
     );
     await _pumpUntilSettled(tester);
@@ -208,15 +184,11 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
 
-    expect(notifier.refreshCallCount, 1);
+    expect(repository.fetchCount, greaterThan(1));
   });
 
   testWidgets('toggles favorite on product card', (tester) async {
-    await tester.pumpWidget(
-      await _buildScreen([
-        productsListProvider.overrideWith(_SuccessProductsListNotifier.new),
-      ]),
-    );
+    await tester.pumpWidget(await _buildScreen());
     await _pumpUntilSettled(tester);
 
     expect(find.byIcon(Icons.favorite_border), findsWidgets);
@@ -230,9 +202,7 @@ void main() {
 
   testWidgets('shows only favorites when filter is enabled', (tester) async {
     await tester.pumpWidget(
-      await _buildScreen([
-        productsListProvider.overrideWith(_MultiProductsListNotifier.new),
-      ]),
+      await _buildScreen(products: const [_sampleProduct, _shirtProduct]),
     );
     await _pumpUntilSettled(tester);
 
@@ -250,9 +220,9 @@ void main() {
 
   testWidgets('shows error view with retry button', (tester) async {
     await tester.pumpWidget(
-      await _buildScreen([
-        productsListProvider.overrideWith(_ErrorProductsListNotifier.new),
-      ]),
+      await _buildScreen(
+        overrides: [productsListProvider.overrideWith(_ErrorNotifier.new)],
+      ),
     );
     await _pumpUntilSettled(tester);
 

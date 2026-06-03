@@ -9,6 +9,11 @@ import 'package:product_catalog_application/data/models/product_model.dart';
 abstract class ProductRemoteDataSource {
   Future<List<ProductModel>> getProducts();
 
+  Future<List<ProductModel>> getProductsPage({
+    required int limit,
+    required int offset,
+  });
+
   Future<ProductModel> getProductById(int id);
 }
 
@@ -39,6 +44,40 @@ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
       }
 
       throw ServerException('Failed to load products (${response.statusCode})');
+    } on SocketException {
+      throw NetworkException();
+    } on FormatException {
+      throw ServerException('Invalid response from server');
+    }
+  }
+
+  @override
+  Future<List<ProductModel>> getProductsPage({
+    required int limit,
+    required int offset,
+  }) async {
+    try {
+      final response = await _client.get(
+        _uri(ApiConstants.productsPath).replace(
+          queryParameters: {
+            'limit': '$limit',
+            'offset': '$offset',
+          },
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body) as List<dynamic>;
+        return decoded
+            .map(
+              (item) => ProductModel.fromJson(item as Map<String, dynamic>),
+            )
+            .toList();
+      }
+
+      throw ServerException(
+        'Failed to load products page (${response.statusCode})',
+      );
     } on SocketException {
       throw NetworkException();
     } on FormatException {

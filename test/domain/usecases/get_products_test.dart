@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:product_catalog_application/core/error/failures.dart';
 import 'package:product_catalog_application/core/error/result.dart';
+import 'package:product_catalog_application/domain/entities/paginated_products.dart';
 import 'package:product_catalog_application/domain/entities/product.dart';
 import 'package:product_catalog_application/domain/repositories/product_repository.dart';
 import 'package:product_catalog_application/domain/usecases/get_products.dart';
@@ -12,6 +13,14 @@ class _FakeProductRepository implements ProductRepository {
 
   @override
   Future<Result<List<Product>>> getProducts() async => _result;
+
+  @override
+  Future<Result<PaginatedProducts>> getProductsPage({
+    required int limit,
+    required int offset,
+  }) async {
+    throw UnimplementedError();
+  }
 
   @override
   Future<Result<Product>> getProductById(int id) async {

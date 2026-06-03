@@ -5,6 +5,7 @@ import 'package:product_catalog_application/core/error/result.dart';
 import 'package:product_catalog_application/data/datasources/product_remote_data_source.dart';
 import 'package:product_catalog_application/data/models/product_model.dart';
 import 'package:product_catalog_application/data/repositories/product_repository_impl.dart';
+import 'package:product_catalog_application/domain/entities/paginated_products.dart';
 import 'package:product_catalog_application/domain/entities/product.dart';
 
 class _FakeRemoteDataSource implements ProductRemoteDataSource {
@@ -25,6 +26,18 @@ class _FakeRemoteDataSource implements ProductRemoteDataSource {
 
   @override
   Future<List<ProductModel>> getProducts() async {
+    final error = _productsError;
+    if (error != null) {
+      throw error;
+    }
+    return _products ?? [];
+  }
+
+  @override
+  Future<List<ProductModel>> getProductsPage({
+    required int limit,
+    required int offset,
+  }) async {
     final error = _productsError;
     if (error != null) {
       throw error;
@@ -79,6 +92,19 @@ void main() {
       (result as ErrorResult<List<Product>>).failure,
       isA<NetworkFailure>(),
     );
+  });
+
+  test('getProductsPage returns Success with hasMore flag', () async {
+    final repository = ProductRepositoryImpl(
+      _FakeRemoteDataSource(products: [model, model]),
+    );
+
+    final result = await repository.getProductsPage(limit: 2, offset: 0);
+
+    expect(result, isA<Success<PaginatedProducts>>());
+    final page = (result as Success<PaginatedProducts>).value;
+    expect(page.products, hasLength(2));
+    expect(page.hasMore, isTrue);
   });
 
   test('getProductById maps NotFoundException to NotFoundFailure', () async {
