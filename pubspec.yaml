@@ -1,5 +1,5 @@
 name: product_catalog_application
-description: "A clean and scalable Flutter Product Catalog application built using Riverpod, MVVM, and Clean Architecture. Features include product listing, product details, local search, favorites persistence, pull-to-refresh, error handling, and responsive UI with proper state management."
+description: Product catalog app for Kodevio assessment.
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
@@ -35,6 +35,7 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
   flutter_riverpod: ^2.6.1
+  state_notifier: ^1.0.0
   http: ^1.2.2
   cached_network_image: ^3.4.1
   shared_preferences: ^2.3.3

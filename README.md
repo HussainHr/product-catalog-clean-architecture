@@ -15,13 +15,20 @@ flutter run
 
 ```
 lib/
-├── main.dart              # ProviderScope entry
-├── app.dart               # MaterialApp root
-├── core/                  # Theme, constants, errors
-├── domain/                # Entities, repositories, use cases
-├── data/                  # Models, data sources, repo impl
-└── presentation/          # Screens, widgets, Riverpod providers
+├── main.dart
+├── app.dart
+├── core/                  # Shared infra (theme, errors, network, storage, widgets)
+└── features/
+    ├── products/          # data / domain / presentation
+    ├── favorites/
+    └── theme/
 ```
+
+Each feature follows Clean Architecture: **domain → data → presentation**.
+
+State management uses **StateNotifier + State class** for list, favorites, and theme. DI stays in Riverpod `Provider`.
+
+Tests mirror the same layout under `test/features/`.
 
 ## Development status
 

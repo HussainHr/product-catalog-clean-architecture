@@ -1,7 +1,7 @@
 import 'package:product_catalog_application/core/error/result.dart';
-import 'package:product_catalog_application/domain/entities/paginated_products.dart';
-import 'package:product_catalog_application/domain/entities/product.dart';
-import 'package:product_catalog_application/domain/repositories/product_repository.dart';
+import 'package:product_catalog_application/features/products/domain/entities/paginated_products.dart';
+import 'package:product_catalog_application/features/products/domain/entities/product.dart';
+import 'package:product_catalog_application/features/products/domain/repositories/product_repository.dart';
 
 class PagedProductRepository implements ProductRepository {
   PagedProductRepository(this._allProducts);

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:product_catalog_application/core/storage/shared_preferences_provider.dart';
 import 'package:product_catalog_application/core/theme/app_theme.dart';
-import 'package:product_catalog_application/presentation/providers/favorites_providers.dart';
-import 'package:product_catalog_application/presentation/providers/theme_mode_provider.dart';
+import 'package:product_catalog_application/features/theme/presentation/providers/theme_mode_notifier.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class TestMaterialApp extends ConsumerWidget {
