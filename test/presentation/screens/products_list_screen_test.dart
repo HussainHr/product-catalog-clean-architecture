@@ -7,6 +7,7 @@ import 'package:product_catalog_application/core/constants/app_strings.dart';
 import 'package:product_catalog_application/core/error/failures.dart';
 import 'package:product_catalog_application/domain/entities/product.dart';
 import 'package:product_catalog_application/presentation/providers/products_list_provider.dart';
+import 'package:product_catalog_application/presentation/screens/products/product_detail_screen.dart';
 import 'package:product_catalog_application/presentation/screens/products/products_list_screen.dart';
 import 'package:product_catalog_application/presentation/widgets/product_card.dart';
 
@@ -84,6 +85,22 @@ void main() {
     expect(find.text('Test Backpack'), findsOneWidget);
     expect(find.text('\$49.99'), findsOneWidget);
     expect(find.text('4.5'), findsOneWidget);
+  });
+
+  testWidgets('navigates to product detail on tap', (tester) async {
+    await tester.pumpWidget(
+      _buildScreen([
+        productsListProvider.overrideWith(_SuccessProductsListNotifier.new),
+      ]),
+    );
+    await _pumpUntilSettled(tester);
+
+    await tester.tap(find.byType(ProductCard));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(find.byType(ProductDetailScreen), findsOneWidget);
+    expect(find.text(AppStrings.productDetailsTitle), findsOneWidget);
   });
 
   testWidgets('shows empty state when no products', (tester) async {

@@ -7,6 +7,7 @@ import 'package:product_catalog_application/presentation/providers/products_list
 import 'package:product_catalog_application/presentation/widgets/empty_view.dart';
 import 'package:product_catalog_application/presentation/widgets/error_view.dart';
 import 'package:product_catalog_application/presentation/widgets/loading_view.dart';
+import 'package:product_catalog_application/presentation/routing/app_router.dart';
 import 'package:product_catalog_application/presentation/widgets/product_card.dart';
 
 class ProductsListScreen extends ConsumerWidget {
@@ -65,7 +66,11 @@ class _ProductsBody extends StatelessWidget {
             ),
             itemCount: products.length,
             itemBuilder: (context, index) {
-              return ProductCard(product: products[index]);
+              final product = products[index];
+              return ProductCard(
+                product: product,
+                onTap: () => openProductDetail(context, product),
+              );
             },
           );
         }
@@ -75,7 +80,11 @@ class _ProductsBody extends StatelessWidget {
           itemCount: products.length,
           separatorBuilder: (context, index) => const SizedBox(height: 12),
           itemBuilder: (context, index) {
-            return ProductCard(product: products[index]);
+            final product = products[index];
+            return ProductCard(
+              product: product,
+              onTap: () => openProductDetail(context, product),
+            );
           },
         );
       },

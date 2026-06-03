@@ -33,6 +33,7 @@ lib/
 | 3 | Data layer (API model, remote DS, repository impl) |
 | 4 | Riverpod DI (providers wired) |
 | 5 | Products list (loading, error, empty, cached images) |
+| 6 | Product detail screen + navigation |
 
 ## Commands
 

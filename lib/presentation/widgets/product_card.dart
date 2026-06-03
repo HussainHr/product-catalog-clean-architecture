@@ -84,7 +84,8 @@ class _ProductImage extends StatelessWidget {
               ),
             ),
           ),
-          errorWidget: (context, url, error) => ColoredBox(            color: Theme.of(context).colorScheme.surfaceContainerHighest,
+          errorWidget: (context, url, error) => ColoredBox(
+            color: Theme.of(context).colorScheme.surfaceContainerHighest,
             child: Icon(
               Icons.image_not_supported_outlined,
               color: Theme.of(context).colorScheme.outline,
