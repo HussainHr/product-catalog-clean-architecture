@@ -32,6 +32,7 @@ lib/
 | 2 | Domain layer (entities, repositories, use cases) |
 | 3 | Data layer (API model, remote DS, repository impl) |
 | 4 | Riverpod DI (providers wired) |
+| 5 | Products list (loading, error, empty, cached images) |
 
 ## Commands
 
