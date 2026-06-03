@@ -37,6 +37,7 @@ lib/
 | 7 | Pull-to-refresh on product listing |
 | 8 | Local search by product title |
 | 9 | Favorites persistence + UI |
+| 10 | UI polish + responsive layout |
 
 ## Commands
 

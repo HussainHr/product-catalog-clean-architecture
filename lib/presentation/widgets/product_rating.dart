@@ -10,12 +10,14 @@ class ProductRating extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = Colors.amber.shade700;
-
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(Icons.star_rounded, size: 18, color: color),
+        Icon(
+          Icons.star_rounded,
+          size: 18,
+          color: Colors.amber.shade700,
+        ),
         const SizedBox(width: 4),
         Text(
           rating.toStringAsFixed(1),

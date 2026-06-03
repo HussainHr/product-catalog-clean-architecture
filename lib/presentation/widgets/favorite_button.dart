@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:product_catalog_application/core/constants/app_strings.dart';
+import 'package:product_catalog_application/core/theme/app_theme.dart';
 import 'package:product_catalog_application/presentation/providers/favorites_providers.dart';
 
 class FavoriteButton extends ConsumerWidget {
@@ -18,7 +19,7 @@ class FavoriteButton extends ConsumerWidget {
     return IconButton(
       icon: Icon(
         isFavorite ? Icons.favorite : Icons.favorite_border,
-        color: isFavorite ? Colors.red : null,
+        color: isFavorite ? AppTheme.favoriteColor : null,
       ),
       tooltip: isFavorite ? AppStrings.removeFavorite : AppStrings.addFavorite,
       onPressed: () => ref.read(favoritesProvider.notifier).toggle(productId),

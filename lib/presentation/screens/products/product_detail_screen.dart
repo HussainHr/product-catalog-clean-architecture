@@ -1,9 +1,12 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:product_catalog_application/core/constants/app_strings.dart';
+import 'package:product_catalog_application/core/theme/app_spacing.dart';
+import 'package:product_catalog_application/core/utils/price_formatter.dart';
+import 'package:product_catalog_application/core/utils/responsive_layout.dart';
 import 'package:product_catalog_application/domain/entities/product.dart';
 import 'package:product_catalog_application/presentation/widgets/favorite_button.dart';
+import 'package:product_catalog_application/presentation/widgets/product_image.dart';
 import 'package:product_catalog_application/presentation/widgets/product_rating.dart';
 
 class ProductDetailScreen extends ConsumerWidget {
@@ -23,83 +26,76 @@ class ProductDetailScreen extends ConsumerWidget {
           FavoriteButton(productId: product.id),
         ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(12),
-                child: SizedBox(
-                  height: 220,
-                  width: double.infinity,
-                  child: CachedNetworkImage(
+      body: ResponsiveContent(
+        maxWidth: 720,
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(AppSpacing.screenPadding),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  return ProductImage(
                     imageUrl: product.imageUrl,
+                    width: constraints.maxWidth,
+                    height: 240,
                     fit: BoxFit.contain,
-                    placeholder: (context, url) => const ColoredBox(
-                      color: Color(0xFFE0E0E0),
-                      child: Center(child: CircularProgressIndicator()),
-                    ),
-                    errorWidget: (context, url, error) => ColoredBox(
-                      color: Theme.of(context)
-                          .colorScheme
-                          .surfaceContainerHighest,
-                      child: Icon(
-                        Icons.image_not_supported_outlined,
-                        size: 48,
-                        color: Theme.of(context).colorScheme.outline,
-                      ),
-                    ),
-                  ),
-                ),
+                    borderRadius: 12,
+                  );
+                },
               ),
-            ),
-            const SizedBox(height: 20),
-            Text(
-              product.title,
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
+              const SizedBox(height: AppSpacing.xl),
+              Text(
+                product.title,
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      height: 1.25,
+                    ),
+              ),
+              const SizedBox(height: AppSpacing.md),
+              Text(
+                PriceFormatter.format(product.price),
+                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                      color: Theme.of(context).colorScheme.primary,
+                      fontWeight: FontWeight.bold,
+                    ),
+              ),
+              const SizedBox(height: AppSpacing.lg),
+              Wrap(
+                spacing: AppSpacing.md,
+                runSpacing: AppSpacing.sm,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: [
+                  _DetailChip(
+                    label: AppStrings.categoryLabel,
+                    value: product.category,
                   ),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              '\$${product.price.toStringAsFixed(2)}',
-              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.primary,
-                    fontWeight: FontWeight.bold,
+                  ProductRating(rating: product.rating),
+                  Text(
+                    '(${product.ratingCount} ${AppStrings.reviewsLabel})',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
                   ),
-            ),
-            const SizedBox(height: 16),
-            Wrap(
-              spacing: 12,
-              runSpacing: 8,
-              crossAxisAlignment: WrapCrossAlignment.center,
-              children: [
-                _DetailChip(
-                  label: AppStrings.categoryLabel,
-                  value: product.category,
-                ),
-                ProductRating(rating: product.rating),
-                Text(
-                  '(${product.ratingCount} ${AppStrings.reviewsLabel})',
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
-              ],
-            ),
-            const SizedBox(height: 24),
-            Text(
-              AppStrings.descriptionLabel,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              product.description,
-              style: Theme.of(context).textTheme.bodyLarge,
-            ),
-          ],
+                ],
+              ),
+              const SizedBox(height: AppSpacing.xl),
+              Text(
+                AppStrings.descriptionLabel,
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              Text(
+                product.description,
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      height: 1.5,
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
+              ),
+            ],
+          ),
         ),
       ),
     );

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:product_catalog_application/core/constants/app_strings.dart';
+import 'package:product_catalog_application/core/theme/app_spacing.dart';
 import 'package:product_catalog_application/presentation/providers/product_search_provider.dart';
 
 class ProductSearchBar extends ConsumerStatefulWidget {
@@ -39,11 +40,17 @@ class _ProductSearchBarState extends ConsumerState<ProductSearchBar> {
     final query = ref.watch(productSearchQueryProvider);
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.screenPadding,
+        AppSpacing.sm,
+        AppSpacing.screenPadding,
+        AppSpacing.sm,
+      ),
       child: TextField(
         key: const Key('product_search_field'),
         controller: _controller,
         onChanged: _onQueryChanged,
+        textInputAction: TextInputAction.search,
         decoration: InputDecoration(
           hintText: AppStrings.searchHint,
           prefixIcon: const Icon(Icons.search),
@@ -54,11 +61,6 @@ class _ProductSearchBarState extends ConsumerState<ProductSearchBar> {
                   tooltip: AppStrings.clearSearch,
                 )
               : null,
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          isDense: true,
-          filled: true,
         ),
       ),
     );
