@@ -3,6 +3,9 @@ abstract final class AppStrings {
   static const String productsTitle = 'Products';
   static const String loadingProducts = 'Loading products...';
   static const String noProductsFound = 'No products found';
+  static const String noSearchResults = 'No products match your search';
+  static const String searchHint = 'Search by product title';
+  static const String clearSearch = 'Clear search';
   static const String retry = 'Retry';
   static const String genericError =
       'Something went wrong. Please try again.';

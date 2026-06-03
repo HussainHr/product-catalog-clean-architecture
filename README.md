@@ -35,6 +35,7 @@ lib/
 | 5 | Products list (loading, error, empty, cached images) |
 | 6 | Product detail screen + navigation |
 | 7 | Pull-to-refresh on product listing |
+| 8 | Local search by product title |
 
 ## Commands
 
@@ -42,9 +43,3 @@ lib/
 flutter analyze
 flutter test
 ```
-
-## Submission (Kodevio)
-
-- **Deadline:** 3 June 2026, 11:59 PM
-- **API:** https://fakestoreapi.com/products
-- **Email:** abdullah.kodevio@gmail.com (CC: ashif.kodevio@gmail.com)

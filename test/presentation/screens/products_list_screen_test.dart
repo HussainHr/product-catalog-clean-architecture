@@ -22,9 +22,25 @@ const _sampleProduct = Product(
   ratingCount: 10,
 );
 
+const _shirtProduct = Product(
+  id: 2,
+  title: 'Mens Casual T-Shirt',
+  price: 22.3,
+  description: 'Description',
+  category: 'men',
+  imageUrl: 'https://example.com/shirt.png',
+  rating: 3.5,
+  ratingCount: 5,
+);
+
 class _SuccessProductsListNotifier extends ProductsListNotifier {
   @override
   Future<List<Product>> build() async => const [_sampleProduct];
+}
+
+class _MultiProductsListNotifier extends ProductsListNotifier {
+  @override
+  Future<List<Product>> build() async => const [_sampleProduct, _shirtProduct];
 }
 
 class _RefreshTrackingNotifier extends ProductsListNotifier {
@@ -125,6 +141,39 @@ void main() {
     await _pumpUntilSettled(tester);
 
     expect(find.text(AppStrings.noProductsFound), findsOneWidget);
+  });
+
+  testWidgets('filters products locally while typing', (tester) async {
+    await tester.pumpWidget(
+      _buildScreen([
+        productsListProvider.overrideWith(_MultiProductsListNotifier.new),
+      ]),
+    );
+    await _pumpUntilSettled(tester);
+
+    expect(find.text('Test Backpack'), findsOneWidget);
+    expect(find.text('Mens Casual T-Shirt'), findsOneWidget);
+
+    await tester.enterText(find.byKey(const Key('product_search_field')), 'backpack');
+    await tester.pump();
+
+    expect(find.text('Test Backpack'), findsOneWidget);
+    expect(find.text('Mens Casual T-Shirt'), findsNothing);
+  });
+
+  testWidgets('shows empty state when search has no matches', (tester) async {
+    await tester.pumpWidget(
+      _buildScreen([
+        productsListProvider.overrideWith(_MultiProductsListNotifier.new),
+      ]),
+    );
+    await _pumpUntilSettled(tester);
+
+    await tester.enterText(find.byKey(const Key('product_search_field')), 'watch');
+    await tester.pump();
+
+    expect(find.text(AppStrings.noSearchResults), findsOneWidget);
+    expect(find.byType(ProductCard), findsNothing);
   });
 
   testWidgets('wraps list with RefreshIndicator for pull to refresh', (tester) async {
