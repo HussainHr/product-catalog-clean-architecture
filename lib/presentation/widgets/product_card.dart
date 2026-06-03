@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:product_catalog_application/domain/entities/product.dart';
+import 'package:product_catalog_application/presentation/widgets/favorite_button.dart';
 import 'package:product_catalog_application/presentation/widgets/product_rating.dart';
 
 class ProductCard extends StatelessWidget {
@@ -51,6 +52,7 @@ class ProductCard extends StatelessWidget {
                   ],
                 ),
               ),
+              FavoriteButton(productId: product.id),
             ],
           ),
         ),

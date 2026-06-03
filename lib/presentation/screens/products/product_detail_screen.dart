@@ -1,10 +1,12 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:product_catalog_application/core/constants/app_strings.dart';
 import 'package:product_catalog_application/domain/entities/product.dart';
+import 'package:product_catalog_application/presentation/widgets/favorite_button.dart';
 import 'package:product_catalog_application/presentation/widgets/product_rating.dart';
 
-class ProductDetailScreen extends StatelessWidget {
+class ProductDetailScreen extends ConsumerWidget {
   const ProductDetailScreen({
     super.key,
     required this.product,
@@ -13,10 +15,13 @@ class ProductDetailScreen extends StatelessWidget {
   final Product product;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       appBar: AppBar(
         title: const Text(AppStrings.productDetailsTitle),
+        actions: [
+          FavoriteButton(productId: product.id),
+        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),

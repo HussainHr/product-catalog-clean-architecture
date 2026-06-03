@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:product_catalog_application/core/constants/app_strings.dart';
 import 'package:product_catalog_application/domain/entities/product.dart';
 import 'package:product_catalog_application/presentation/screens/products/product_detail_screen.dart';
+import '../../helpers/test_helpers.dart';
 
 const _product = Product(
   id: 1,
@@ -18,8 +19,10 @@ const _product = Product(
 void main() {
   testWidgets('shows all product detail fields', (tester) async {
     await tester.pumpWidget(
-      const MaterialApp(
-        home: ProductDetailScreen(product: _product),
+      await buildTestApp(
+        child: const MaterialApp(
+          home: ProductDetailScreen(product: _product),
+        ),
       ),
     );
     await tester.pump();
@@ -36,5 +39,6 @@ void main() {
       findsOneWidget,
     );
     expect(find.text(AppStrings.descriptionLabel), findsOneWidget);
+    expect(find.byIcon(Icons.favorite_border), findsOneWidget);
   });
 }

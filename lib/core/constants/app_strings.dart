@@ -13,5 +13,9 @@ abstract final class AppStrings {
   static const String descriptionLabel = 'Description';
   static const String categoryLabel = 'Category';
   static const String reviewsLabel = 'reviews';
-  static const String favorite = 'Favorite';
+  static const String addFavorite = 'Add to favorites';
+  static const String removeFavorite = 'Remove from favorites';
+  static const String showFavoritesOnly = 'Show favorites only';
+  static const String showAllProducts = 'Show all products';
+  static const String noFavoritesFound = 'No favorite products yet';
 }

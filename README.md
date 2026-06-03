@@ -36,6 +36,7 @@ lib/
 | 6 | Product detail screen + navigation |
 | 7 | Pull-to-refresh on product listing |
 | 8 | Local search by product title |
+| 9 | Favorites persistence + UI |
 
 ## Commands
 

@@ -4,6 +4,7 @@ import 'package:product_catalog_application/core/constants/app_strings.dart';
 import 'package:product_catalog_application/core/error/failures.dart';
 import 'package:product_catalog_application/domain/entities/product.dart';
 import 'package:product_catalog_application/presentation/providers/product_providers.dart';
+import 'package:product_catalog_application/presentation/providers/favorites_providers.dart';
 import 'package:product_catalog_application/presentation/providers/product_search_provider.dart';
 import 'package:product_catalog_application/presentation/providers/products_list_provider.dart';
 import 'package:product_catalog_application/presentation/routing/app_router.dart';
@@ -19,10 +20,27 @@ class ProductsListScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final productsState = ref.watch(productsListProvider);
+    final showFavoritesOnly = ref.watch(showFavoritesOnlyProvider);
 
     return Scaffold(
       appBar: AppBar(
         title: const Text(AppStrings.productsTitle),
+        actions: [
+          IconButton(
+            key: const Key('favorites_filter_button'),
+            icon: Icon(
+              showFavoritesOnly ? Icons.favorite : Icons.favorite_border,
+              color: showFavoritesOnly ? Colors.red : null,
+            ),
+            tooltip: showFavoritesOnly
+                ? AppStrings.showAllProducts
+                : AppStrings.showFavoritesOnly,
+            onPressed: () {
+              ref.read(showFavoritesOnlyProvider.notifier).state =
+                  !showFavoritesOnly;
+            },
+          ),
+        ],
       ),
       body: productsState.when(
         loading: () => const LoadingView(message: AppStrings.loadingProducts),
@@ -59,11 +77,18 @@ class _ProductsBody extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final query = ref.watch(productSearchQueryProvider);
     final searchUseCase = ref.read(searchProductsByTitleProvider);
-    final products = filterProductsBySearch(
+    final showFavoritesOnly = ref.watch(showFavoritesOnlyProvider);
+    final favoriteIds = ref.watch(favoritesProvider).valueOrNull ?? {};
+
+    final searchedProducts = filterProductsBySearch(
       products: allProducts,
       query: query,
       searchUseCase: searchUseCase,
     );
+    final products = showFavoritesOnly
+        ? searchedProducts.where((p) => favoriteIds.contains(p.id)).toList()
+        : searchedProducts;
+
     final isSearching = query.trim().isNotEmpty;
 
     Future<void> onRefresh() =>
@@ -78,6 +103,24 @@ class _ProductsBody extends ConsumerWidget {
             SizedBox(
               height: 320,
               child: EmptyView(),
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (products.isEmpty && showFavoritesOnly) {
+      return RefreshIndicator(
+        onRefresh: onRefresh,
+        child: ListView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          children: const [
+            SizedBox(
+              height: 280,
+              child: EmptyView(
+                message: AppStrings.noFavoritesFound,
+                icon: Icons.favorite_border,
+              ),
             ),
           ],
         ),

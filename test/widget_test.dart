@@ -1,9 +1,9 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:product_catalog_application/app.dart';
 import 'package:product_catalog_application/core/constants/app_strings.dart';
 import 'package:product_catalog_application/domain/entities/product.dart';
 import 'package:product_catalog_application/presentation/providers/products_list_provider.dart';
+import 'helpers/test_helpers.dart';
 
 class _TestProductsListNotifier extends ProductsListNotifier {
   @override
@@ -24,7 +24,7 @@ class _TestProductsListNotifier extends ProductsListNotifier {
 void main() {
   testWidgets('app loads products list screen', (WidgetTester tester) async {
     await tester.pumpWidget(
-      ProviderScope(
+      await buildTestApp(
         overrides: [
           productsListProvider.overrideWith(_TestProductsListNotifier.new),
         ],
