@@ -1,17 +1,49 @@
-# Product Catalog Application
+# Product Catalog
 
-Flutter app for the Product Catalog assessment.
+Flutter technical assessment — product listing, details, search, and favorites.
 
-## Run
+**Stack:** Clean Architecture, MVVM, Riverpod
+
+## Quick start
 
 ```bash
 flutter pub get
 flutter run
 ```
 
-## Analyze & test
+## Project layout
+
+```
+lib/
+├── main.dart              # ProviderScope entry
+├── app.dart               # MaterialApp root
+├── core/                  # Theme, constants, errors
+├── domain/                # Entities, repositories, use cases
+├── data/                  # Models, data sources, repo impl
+└── presentation/          # Screens, widgets, Riverpod providers
+```
+
+## Development status
+
+| Sprint | Status |
+|--------|--------|
+| 0 | Baseline shell |
+| 1 | Riverpod + theme + folder structure |
+| 2 | Domain layer (entities, repositories, use cases) |
+| 3 | Data layer (API model, remote DS, repository impl) |
+| 4 | Riverpod DI (providers wired) |
+| 5 | Products list (loading, error, empty, cached images) |
+| 6 | Product detail screen + navigation |
+
+## Commands
 
 ```bash
 flutter analyze
 flutter test
 ```
+
+## Submission (Kodevio)
+
+- **Deadline:** 3 June 2026, 11:59 PM
+- **API:** https://fakestoreapi.com/products
+- **Email:** abdullah.kodevio@gmail.com (CC: ashif.kodevio@gmail.com)
