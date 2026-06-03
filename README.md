@@ -8,16 +8,16 @@ A Flutter product catalog app built for the **Kodevio technical assessment**. It
 
 ## Features
 
-| Feature | Description |
-|---------|-------------|
-| Product listing | Paginated grid/list with loading, empty, and error states |
-| Infinite scroll | Loads more items via `limit` / `offset` (10 per page) |
-| Product details | Title, price, image, category, rating, description |
-| Pull-to-refresh | Refreshes the current list from the API |
-| Local search | Filters loaded products by title (client-side) |
-| Favorites | Toggle favorites; persisted with `SharedPreferences` |
-| Favorites filter | AppBar toggle to show only favorited products |
-| Dark / light theme | Toggle in AppBar; preference persisted locally |
+| Feature | Description                                                  |
+|---------|--------------------------------------------------------------|
+| Product listing | Paginated grid/list with loading, empty, and error states    |
+| Infinite scroll | Loads more items via `limit` / `offset` (20 per page)        |
+| Product details | Title, price, image, category, rating, description           |
+| Pull-to-refresh | Refreshes the current list from the API                      |
+| Local search | Filters loaded products by title (client-side)               |
+| Favorites | Toggle favorites; persisted with `SharedPreferences`         |
+| Favorites filter | AppBar toggle to show only favorited products                |
+| Dark / light theme | Toggle in AppBar; preference persisted locally               |
 | Responsive UI | 1 / 2 / 3 columns by screen width (phone / tablet / desktop) |
 
 ---
@@ -50,13 +50,13 @@ A Flutter product catalog app built for the **Kodevio technical assessment**. It
 ### Prerequisites
 
 - Flutter SDK (3.10+)
-- Android Studio / VS Code with Flutter extensions, or Cursor
+- Android Studio / VS Code with Flutter extensions
 - An emulator, physical device, or desktop target
 
 ### Install and run
 
 ```bash
-git clone <your-repo-url>
+git clone <https://github.com/HussainHr/product-catalog-clean-architecture.git>
 cd product-catalog-clean-architecture
 flutter pub get
 flutter run
