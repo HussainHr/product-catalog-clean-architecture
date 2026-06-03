@@ -71,11 +71,26 @@ flutter test
 
 ### Release APK (Android)
 
+The app loads products and images over **HTTPS** (`fakestoreapi.com`). The main manifest includes:
+
+| Permission | Required for |
+|------------|----------------|
+| `INTERNET` | API calls and `cached_network_image` |
+| `ACCESS_NETWORK_STATE` | Optional; standard for network apps |
+
+Configured in `android/app/src/main/AndroidManifest.xml` (applies to **release** builds, not only debug).
+
 ```bash
 flutter build apk --release
 ```
 
 Output: `build/app/outputs/flutter-apk/app-release.apk`
+
+Install on a device:
+
+```bash
+flutter install --release
+```
 
 ---
 
